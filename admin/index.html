@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <title>Nightwatch Admin | LSPD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="brand"><div class="mark">N</div><div><b>LSPD <span>NIGHTWATCH</span></b><small>ADMINISTRATION CONSOLE</small></div></header>
+    <section id="loginView" class="panel login">
+      <div class="eyebrow">RESTRICTED ACCESS</div>
+      <h1>Admin sign in</h1>
+      <p>Sign in with your approved Nightwatch administrator account.</p>
+      <form id="loginForm">
+        <label>Email address<input id="email" type="email" autocomplete="username" required></label>
+        <label>Password<input id="password" type="password" autocomplete="current-password" required></label>
+        <button class="primary" type="submit">Sign in securely</button>
+      </form>
+      <div id="loginMessage" class="message" role="status"></div>
+      <small class="fine">Account registration is disabled. Access is additionally restricted by Supabase database policies.</small>
+    </section>
+    <section id="adminView" class="hidden">
+      <div class="topline"><div><div class="eyebrow">CONTROL CENTER</div><h1>Nightwatch Admin</h1><p id="signedInAs"></p></div><button id="signOut" class="secondary">Sign out</button></div>
+      <div id="systemMessage" class="message" role="status"></div>
+      <div class="cards" id="tableCards"></div>
+      <section class="panel">
+        <div class="sectionhead"><div><h2>Database inspection</h2><p>Read-only connection check for the five Nightwatch tables.</p></div><button id="refresh" class="secondary">Refresh</button></div>
+        <div id="results" class="results"><div class="muted">Checking database…</div></div>
+      </section>
+      <section class="panel warning">
+        <h2>Security status</h2>
+        <p>This admin page uses Supabase email/password authentication. The publishable key is public by design; database access must remain protected by Row Level Security. Do not add a service-role key to this website.</p>
+        <p>Record editing is intentionally not enabled until the exact table columns and policies are verified. This prevents accidental writes to an unknown schema.</p>
+      </section>
+    </section>
+    <footer>LSPD NIGHTWATCH · ROLEPLAY ADMINISTRATION</footer>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
