@@ -34,21 +34,41 @@ $('#newRecord').onclick=()=>openForm(page==='dashboard'?'cases':page);
 $('#recordForm').onsubmit=async e=>{e.preventDefault();let key=e.target.dataset.key,fd=new FormData(e.target),memberIds=key==='rico'?Array.from($('#investigatorIds')?.selectedOptions||[]).map(o=>o.value):[],data=Object.fromEntries(fd.entries());delete data.investigatorIds;let old=editing?records[key].find(x=>x.id===editing):null;data.id=editing||crypto.randomUUID();if(!editing){data.author=profiles.find(p=>p.id===currentUser.id)?.display_name||currentUser.email;data.createdAt=new Date().toISOString();if(key==='cases'&&!data.caseNumber)data.caseNumber='LSPD-'+String(Date.now()).slice(-6);if(key==='warrants'&&!data.warrantNumber)data.warrantNumber='W-'+String(Date.now()).slice(-6)}else{data.author=old.author;data.createdAt=old.createdAt;data.updatedAt=new Date().toISOString();if(key==='suspects')data.affiliationHistory=old.affiliationHistory||[]}try{if(editing){const {error}=await sb.from('nightwatch_records').update({data,updated_at:new Date().toISOString()}).eq('id',data.id);if(error)throw error}else{const {error}=await sb.from('nightwatch_records').insert({id:data.id,record_type:key,data,created_by:currentUser.id,author:data.author});if(error)throw error}if(key==='rico'){if(editing){const {error}=await sb.from('nightwatch_record_members').delete().eq('record_id',data.id);if(error)throw error}if(memberIds.length){const {error}=await sb.from('nightwatch_record_members').insert(memberIds.map(user_id=>({record_id:data.id,user_id,added_by:currentUser.id})));if(error)throw error}}await loadCloudRecords();log((editing?'Updated ':'Created ')+LABELS[key]+': '+(data.title||data.name||data.caseNumber||data.warrantNumber||data.subject||'record'));closeForm();render();toast('Record saved to shared Nightwatch');openReport(key,data.id)}catch(err){toast('Save failed: '+(err.message||'Check database setup and permissions'))}};
 $('#closeReport').onclick=()=>$('#reportModal').classList.remove('open');$('#reportModal').addEventListener('click',e=>{if(e.target.id==='reportModal')$('#reportModal').classList.remove('open')});$('#closeModal').onclick=closeForm;$('#cancelModal').onclick=closeForm;$('#menuBtn').onclick=()=>$('#sidebar').classList.toggle('open');$('#profileBtn').onclick=()=>navigate('admin');$('#today').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});
 $('#profileName').textContent=localStorage.getItem('nw_name')||'Detective';$('#profileRank').textContent=localStorage.getItem('nw_rank')||'Detective Division';
-document.addEventListener('submit',async e=>{if(e.target.id==='profileForm'){e.preventDefault();let f=new FormData(e.target);const {error}=await sb.from('nightwatch_profiles').update({display_name:f.get('name'),rank:f.get('rank'),callsign:f.get('callsign')}).eq('id',currentUser.id);if(error){toast('Profile update failed: '+error.message);return}await loadCloudRecords();$('#profileName').textContent=f.get('name');$('#profileRank').textContent=f.get('rank');toast('Shared detective profile updated')}});document.addEventListener('click',e=>{if(e.target.id==='signOutBtn')sb.auth.signOut().then(()=>location.reload());if(e.target.id==='exportBtn'){let data={records,activity,exportedAt:new Date().toISOString()};let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='nightwatch-backup.json';a.click();URL.revokeObjectURL(a.href)}if(e.target.id==='clearBtn'&&confirm('Permanently clear all Nightwatch records stored in this browser?')){KEYS.forEach(k=>records[k]=[]);activity=[];toast('Local records cleared')}});document.addEventListener('change',e=>{if(e.target.id==='importFile'){let f=e.target.files[0];if(!f)return;let reader=new FileReader();reader.onload=()=>{try{let d=JSON.parse(reader.result);if(!d.records)throw Error();KEYS.forEach(k=>records[k]=d.records[k]||[]);activity=d.activity||[];
+document.addEventListener('submit',async e=>{if(e.target.id==='profileForm'){e.preventDefault();let f=new FormData(e.target);const {error}=await sb.from('nightwatch_profiles').update({display_name:f.get('name'),rank:f.get('rank'),callsign:f.get('callsign')}).eq('id',currentUser.id);if(error){toast('Profile update failed: '+error.message);return}await loadCloudRecords();$('#profileName').textContent=f.get('name');$('#profileRank').textContent=f.get('rank');toast('Shared detective profile updated')}});document.addEventListener('click',e=>{if(e.target.id==='signOutBtn')sb.auth.signOut().then(()=>location.reload());if(e.target.id==='exportBtn'){let data={records,activity,exportedAt:new Date().toISOString()};let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='nightwatch-backup.json';a.click();URL.revokeObjectURL(a.href)}if(e.target.id==='clearBtn'&&confirm('Permanently clear all Nightwatch records stored in this browser?')){KEYS.forEach(k=>records[k]=[]);activity=[];toast('Local records cleared')}});
 async function loadCloudRecords(){
- const [{data:rows,error:rErr},{data:prof,error:pErr}]=await Promise.all([sb.from('nightwatch_records').select('*').order('created_at',{ascending:false}),sb.from('nightwatch_profiles').select('*').order('display_name')]);
- if(rErr)throw rErr;if(pErr)throw pErr;profiles=prof||[];KEYS.forEach(k=>records[k]=[]);
+ const [{data:rows,error:rErr},{data:prof,error:pErr}]=await Promise.all([
+  sb.from('nightwatch_records').select('*').order('created_at',{ascending:false}),
+  sb.from('nightwatch_profiles').select('*').order('display_name')
+ ]);
+ if(rErr)throw rErr;if(pErr)throw pErr;
+ profiles=prof||[];KEYS.forEach(k=>records[k]=[]);
  const ids=(rows||[]).map(r=>r.id);let memberships=[];
  if(ids.length){const {data,error}=await sb.from('nightwatch_record_members').select('record_id,user_id').in('record_id',ids);if(error)throw error;memberships=data||[]}
- (rows||[]).forEach(row=>{let d={...(row.data||{}),id:row.id,author:row.author,createdAt:row.created_at,updatedAt:row.updated_at,_createdBy:row.created_by};if(row.record_type==='rico'||row.record_type==='corruption')d._memberIds=memberships.filter(m=>m.record_id===row.id).map(m=>m.user_id);records[row.record_type]?.push(d)});
+ (rows||[]).forEach(row=>{
+  let d={...(row.data||{}),id:row.id,author:row.author,createdAt:row.created_at,updatedAt:row.updated_at,_createdBy:row.created_by};
+  if(row.record_type==='rico'||row.record_type==='corruption')d._memberIds=memberships.filter(m=>m.record_id===row.id).map(m=>m.user_id);
+  records[row.record_type]?.push(d);
+ });
  records.detectives=profiles.map(p=>({id:p.id,name:p.display_name,callsign:p.callsign,rank:p.rank,assignment:p.assignment,status:p.status,email:p.email}));
- $('#profileName').textContent=profiles.find(p=>p.id===currentUser.id)?.display_name||currentUser.email;$('#profileRank').textContent=profiles.find(p=>p.id===currentUser.id)?.rank||'Detective Division';$('#caseNavCount').textContent=records.cases.length;
+ $('#profileName').textContent=profiles.find(p=>p.id===currentUser.id)?.display_name||currentUser.email;
+ $('#profileRank').textContent=profiles.find(p=>p.id===currentUser.id)?.rank||'Detective Division';
+ $('#caseNavCount').textContent=records.cases.length;
 }
 async function initNightwatch(){
- const {data:{session}}=await sb.auth.getSession();if(!session){$('#authScreen').style.display='grid';$('#appShell').hidden=true;return}currentUser=session.user;
- try{await loadCloudRecords();$('#authScreen').style.display='none';$('#appShell').hidden=false;render()}catch(err){$('#authError').textContent='Database setup is incomplete: '+err.message;$('#authScreen').style.display='grid';$('#appShell').hidden=true}
+ const {data:{session}}=await sb.auth.getSession();
+ if(!session){$('#authScreen').style.display='grid';$('#appShell').hidden=true;return}
+ currentUser=session.user;
+ try{await loadCloudRecords();$('#authScreen').style.display='none';$('#appShell').hidden=false;render()}
+ catch(err){$('#authError').textContent='Database setup is incomplete: '+err.message;$('#authScreen').style.display='grid';$('#appShell').hidden=true}
 }
-$('#loginForm').onsubmit=async e=>{e.preventDefault();$('#authError').textContent='';$('#loginSubmit').disabled=true;$('#loginSubmit').textContent='Signing in…';const {data,error}=await sb.auth.signInWithPassword({email:$('#loginEmail').value.trim(),password:$('#loginPassword').value});$('#loginSubmit').disabled=false;$('#loginSubmit').textContent='Sign In';if(error){$('#authError').textContent=error.message;return}currentUser=data.user;try{await loadCloudRecords();$('#authScreen').style.display='none';$('#appShell').hidden=false;render()}catch(err){$('#authError').textContent='Database setup is incomplete: '+err.message;await sb.auth.signOut()}};
+$('#loginForm').onsubmit=async e=>{
+ e.preventDefault();$('#authError').textContent='';$('#loginSubmit').disabled=true;$('#loginSubmit').textContent='Signing in…';
+ const {data,error}=await sb.auth.signInWithPassword({email:$('#loginEmail').value.trim(),password:$('#loginPassword').value});
+ $('#loginSubmit').disabled=false;$('#loginSubmit').textContent='Sign In';
+ if(error){$('#authError').textContent=error.message;return}
+ currentUser=data.user;
+ try{await loadCloudRecords();$('#authScreen').style.display='none';$('#appShell').hidden=false;render()}
+ catch(err){$('#authError').textContent='Database setup is incomplete: '+err.message;await sb.auth.signOut()}
+};
 sb.auth.onAuthStateChange((_event,session)=>{if(!session){$('#authScreen').style.display='grid';$('#appShell').hidden=true}});
-initNightwatch();toast('Backup restored')}catch{toast('That backup file could not be read')}};reader.readAsText(f)}});
-save();render();
+initNightwatch();
