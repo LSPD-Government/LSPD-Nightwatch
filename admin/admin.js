@@ -1,7 +1,7 @@
 (() => {
   const SUPABASE_URL = 'https://yxnzhhlribtiqhtqfoky.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_luvPjOV0_pNflVGNMrOMKw_XqWrq_ob';
-  const ADMIN_EMAIL = 'rosaifuddin749@gmail.com'.toLowerCase();
+  const ADMIN_EMAILS = ['rosaifuddin749@gmail.com', 'c2022adams@gmail.com'].map(email => email.toLowerCase());
   const TABLES = [
     ['nightwatch_cases','Cases'],
     ['nightwatch_warrants','Warrants'],
@@ -42,11 +42,11 @@
     event.preventDefault();
     const email = $('email').value.trim().toLowerCase();
     const password = $('password').value;
-    if (email !== ADMIN_EMAIL) { setMessage('loginMessage','This account is not on the approved administrator list.','error'); return; }
+    if (!ADMIN_EMAILS.includes(email)) { setMessage('loginMessage','This account is not on the approved administrator list.','error'); return; }
     setMessage('loginMessage','Signing in…');
     const { data, error } = await client.auth.signInWithPassword({ email, password });
     if (error) { setMessage('loginMessage',error.message,'error'); return; }
-    if (!data.user || data.user.email?.toLowerCase() !== ADMIN_EMAIL) {
+    if (!data.user || !ADMIN_EMAILS.includes(data.user.email?.toLowerCase())) {
       await client.auth.signOut();
       setMessage('loginMessage','This account is not authorized for the admin console.','error');
       return;
@@ -59,13 +59,13 @@
   $('refresh').addEventListener('click', loadData);
   client.auth.onAuthStateChange((_event, session) => {
     if (!session) { showSignedOut(); return; }
-    if (session.user.email?.toLowerCase() !== ADMIN_EMAIL) { client.auth.signOut(); showSignedOut(); return; }
+    if (!ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) { client.auth.signOut(); showSignedOut(); return; }
     showSignedIn(session.user.email);
     setTimeout(loadData,0);
   });
   client.auth.getSession().then(({data}) => {
     const user = data.session?.user;
-    if (user?.email?.toLowerCase() === ADMIN_EMAIL) { showSignedIn(user.email); loadData(); }
+    if (user && ADMIN_EMAILS.includes(user.email?.toLowerCase())) { showSignedIn(user.email); loadData(); }
     else if (user) { client.auth.signOut(); showSignedOut(); }
     else showSignedOut();
   });
