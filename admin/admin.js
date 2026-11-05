@@ -1,7 +1,7 @@
 (() => {
   const SUPABASE_URL = 'https://yxnzhhlribtiqhtqfoky.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_luvPjOV0_pNflVGNMrOMKw_XqWrq_ob';
-  const ADMIN_EMAILS = ['rosaifuddin749@gmail.com', 'c2022adams@gmail.com'].map(email => email.toLowerCase());
+  const ADMIN_EMAILS = ['rosaifuddin749@gmail.com', 'c2022adams@gmail.com', 'archiewestwood7@gmail.com', 'pun.267d@gmail.com'].map(email => email.toLowerCase());
   const TABLES = [
     ['nightwatch_cases','Cases'],
     ['nightwatch_warrants','Warrants'],
