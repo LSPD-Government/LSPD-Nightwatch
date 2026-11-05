@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="app-shell">
+<div class="auth-screen" id="authScreen"><form class="auth-card" id="loginForm"><div class="brand-mark">N</div><div class="eyebrow blue">LOS SANTOS POLICE DEPARTMENT</div><h1>Nightwatch Access</h1><p>Sign in with your issued detective account to access division records.</p><label>Email address<input id="loginEmail" type="email" autocomplete="username" required></label><label>Password<input id="loginPassword" type="password" autocomplete="current-password" required></label><button class="primary-btn" type="submit" id="loginSubmit">Sign In</button><div class="auth-error" id="authError"></div><small>Accounts are issued by division administration. Public registration is disabled.</small></form></div>\n<div class="app-shell" id="appShell" hidden>
   <aside class="sidebar" id="sidebar">
     <div class="brand"><div class="brand-mark">N</div><div><b>LSPD <span>NIGHTWATCH</span></b><small>DETECTIVE DIVISION</small></div></div>
     <div class="nav-label">WORKSPACE</div>
@@ -30,7 +30,7 @@
     <div class="sidebar-bottom"><div class="status-dot"></div><div><b>LOCAL SYSTEM</b><small>Browser storage enabled</small></div></div>
   </aside>
   <main class="main">
-    <header class="topbar"><button class="mobile-menu" id="menuBtn">☰</button><div class="crumb">LSPD <span>/</span> <b id="crumb">Dashboard</b></div><div class="top-actions"><span class="live-pill"><i></i> SYSTEM ONLINE</span><button class="icon-btn" title="Notifications">♧</button><button class="profile" id="profileBtn"><span class="avatar">D</span><span><b id="profileName">Detective</b><small id="profileRank">Detective Division</small></span><span>⌄</span></button></div></header>
+    <header class="topbar"><button class="mobile-menu" id="menuBtn">☰</button><div class="crumb">LSPD <span>/</span> <b id="crumb">Dashboard</b></div><div class="top-actions"><span class="live-pill"><i></i> SECURE CLOUD</span><button class="icon-btn" title="Notifications">♧</button><button class="profile" id="profileBtn"><span class="avatar">D</span><span><b id="profileName">Detective</b><small id="profileRank">Detective Division</small></span><span>⌄</span></button></div></header>
     <section class="content">
       <div class="hero" id="hero"><div class="hero-copy"><div class="eyebrow"><span></span> LOS SANTOS POLICE DEPARTMENT</div><h1>Intelligence at<br><span>the forefront.</span></h1><p>One command center for investigations, intelligence, and the pursuit of the truth.</p><div class="hero-meta"><span>◷ <b id="today"></b></span><span>•</span><span>DETECTIVE DIVISION PORTAL</span></div></div><div class="hero-art"><div class="cityline"></div><div class="beam"></div><div class="badge-watermark">✦</div><div class="hero-caption">PROTECT · SERVE · INVESTIGATE</div></div></div>
       <div class="page-heading"><div><div class="eyebrow blue">OVERVIEW</div><h2 id="pageTitle">Division Dashboard</h2><p id="pageSub">A live overview of your division's activity and investigations.</p></div><button class="primary-btn" id="newRecord">＋ New Record</button></div>
@@ -41,5 +41,5 @@
 </div>
 <div class="modal-backdrop" id="modal"><div class="modal"><div class="modal-head"><div><div class="eyebrow blue">NIGHTWATCH RECORDS</div><h3 id="modalTitle">Create Record</h3></div><button class="close-btn" id="closeModal">×</button></div><form id="recordForm"><div id="formFields" class="form-grid"></div><div class="modal-actions"><button type="button" class="secondary-btn" id="cancelModal">Cancel</button><button class="primary-btn" type="submit">Save Record</button></div></form></div></div>
 <div class="report-backdrop" id="reportModal"><article class="report-sheet"><div class="report-toolbar"><span class="report-classification">LSPD · OFFICIAL ROLEPLAY RECORD</span><button class="close-btn" id="closeReport" aria-label="Close report">×</button></div><div id="reportContent"></div></article></div><div class="toast" id="toast"></div>
-<script src="app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>\n<script src="app.js"></script>
 </body></html>
