@@ -19,7 +19,7 @@ The existing legacy tables are not deleted or modified.
 
 ## 2. Issue officer accounts
 
-In Supabase, open **Authentication → Users → Add user / Invite user** and create an account for each detective. Do not enable public sign-ups. The database trigger automatically creates that officer's directory profile when the Auth user is created.
+In Supabase, open **Authentication → Settings** (or **Sign In / Providers**, depending on the dashboard layout) and turn off **Allow new users to sign up**. Then open **Authentication → Users → Add user / Invite user** and issue an account to each detective. The database trigger automatically creates that officer's directory profile when the Auth user is created.
 
 Officers sign in on the main Nightwatch website with their issued email and password.
 
